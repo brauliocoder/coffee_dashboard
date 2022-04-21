@@ -6,7 +6,7 @@
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
 
-until CoffeeList.count == 100
+until CoffeeList.count == 25
   coffee_name = Faker::Coffee.blend_name
   if !CoffeeList.exists?(name: coffee_name)
     CoffeeList.create(
@@ -37,14 +37,9 @@ calendar = {
 datetime_now = DateTime.now
 coffee_available = CoffeeList.count
 coffee_ids = CoffeeList.pluck(:id)
-mean_price = 0
+mean_price = CoffeeList.average(:price)
 
-CoffeeList.all.each do |coffee|
-  mean_price += coffee.price
-end
-mean_price = mean_price / coffee_available
-
-2500.times do
+until Order.count == 1000
   year = rand(2017..datetime_now.year)
   month = rand(1..12)
   day = rand(1..calendar[month])
@@ -54,7 +49,7 @@ mean_price = mean_price / coffee_available
 
   time_stamp = DateTime.new(year, month, day, hour, minute, second)
   if time_stamp > datetime_now
-    time_stamp = datetime_now - rand(1..45)
+    time_stamp = datetime_now - rand(1..365)
   end
 
   order = Order.new(created_at: time_stamp, updated_at: time_stamp)
@@ -72,6 +67,7 @@ mean_price = mean_price / coffee_available
       order.quantity = rand(1..5)
     end
 
+    order.total = order.quantity * CoffeeList.find(order.coffee_list_id).price
     order.save
     
   # 13% buyers purchase a coffee following early adopters preferences no matter the price
@@ -83,32 +79,35 @@ mean_price = mean_price / coffee_available
       order.coffee_list_id = options_ids[rand(0...options_ids.count)]
       order.quantity = rand(1..5)
 
+      order.total = order.quantity * CoffeeList.find(order.coffee_list_id).price
       order.save
     end
 
     
-  # 27% buyers purchase ONLY most POPULAR coffees with 20 or more sells
+  # 27% buyers purchase ONLY most POPULAR coffees
   # but at a HIGHER price and LOWER order quantity
   when 4..7
-    option = CoffeeList.order(orders_count: :desc).limit(20).popular_coffee(20).where('price > ?', mean_price)
+    option = CoffeeList.order(orders_count: :desc).popular_coffee(10).where('price > ?', mean_price)
     if option.count >= 1
       options_ids = option.pluck(:id)
 
       order.coffee_list_id = options_ids[rand(0...options_ids.count)]
       order.quantity = rand(1..5)
 
+      order.total = order.quantity * CoffeeList.find(order.coffee_list_id).price
       order.save
     end
   # 53% buyers purchase ONLY influenced by POPULAR coffees with the LOWER price 
   # at a LOWER order
   when 8..15
-    option = CoffeeList.order(:orders_count).limit(20).popular_coffee(20).where('price < ?', mean_price)
+    option = CoffeeList.order(orders_count: :desc).popular_coffee(30).where('price < ?', mean_price)
     if option.count >= 1
       options_ids = option.pluck(:id)
 
       order.coffee_list_id = options_ids[rand(0...options_ids.count)]
       order.quantity = rand(1..5)
       
+      order.total = order.quantity * CoffeeList.find(order.coffee_list_id).price
       order.save
     end
   end

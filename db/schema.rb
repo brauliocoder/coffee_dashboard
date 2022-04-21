@@ -27,6 +27,7 @@ ActiveRecord::Schema.define(version: 2022_04_21_145249) do
   create_table "orders", force: :cascade do |t|
     t.bigint "coffee_list_id", null: false
     t.integer "quantity"
+    t.integer "total"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["coffee_list_id"], name: "index_orders_on_coffee_list_id"

@@ -1,2 +1,64 @@
-<h1>Dashboard#index</h1>
-<p>Find me in app/views/dashboard/index.html.erb</p>
+<div class="container">
+  <h1>Dashboard</h1>
+
+  <h2>Sales quantity</h2>
+  <h3>12 months</h3>
+  <div class="chart">
+    <%= area_chart Order.last_this_months(12).group_by_month(:created_at).count %>
+  </div>
+
+  <h2>Sales ammount</h2>
+  <h3>12 months</h3>
+  <div class="chart">
+    <%= area_chart Order.last_this_months(12).group_by_month(:created_at).sum(:total), prefix: "$", thousands: ".", decimal: ",", precision: 2 %>
+  </div>
+
+  <h2>Sales average</h2>
+  <h3>12 months</h3>
+  <div class="chart">
+    <%= area_chart Order.last_this_months(12).group_by_month(:created_at).average(:total), prefix: "$", thousands: ".", decimal: ",", precision: 2 %>
+  </div>
+
+
+  <h2>By origin</h2>
+  <h3>12 months</h3>
+  <div class="chart">
+    <%= pie_chart Order.joins(:coffee_list).where('orders.created_at >= ?', (DateTime.now - 12.months)).group('coffee_lists.origin').sum(:quantity) %>
+  </div>
+
+  <h3>6 months</h3>
+  <div class="chart">
+    <%= pie_chart Order.joins(:coffee_list).where('orders.created_at >= ?', (DateTime.now - 6.months)).group('coffee_lists.origin').sum(:quantity) %>
+  </div>
+
+  <h3>3 months</h3>
+  <div class="chart">
+    <%= pie_chart Order.joins(:coffee_list).where('orders.created_at >= ?', (DateTime.now - 3.months)).group('coffee_lists.origin').sum(:quantity) %>
+  </div>
+
+  <h3>last month</h3>
+  <div class="chart">
+    <%= pie_chart Order.joins(:coffee_list).where('orders.created_at >= ?', (DateTime.now - 1.months)).group('coffee_lists.origin').sum(:quantity) %>
+  </div>
+
+  <h2>By name</h2>
+  <h3>12 months</h3>
+  <div class="chart">
+    <%= pie_chart Order.joins(:coffee_list).where('orders.created_at >= ?', (DateTime.now - 12.months)).group('coffee_lists.name').sum(:quantity) %>
+  </div>
+
+  <h3>6 months</h3>
+  <div class="chart">
+    <%= pie_chart Order.joins(:coffee_list).where('orders.created_at >= ?', (DateTime.now - 6.months)).group('coffee_lists.name').sum(:quantity) %>
+  </div>
+
+  <h3>3 months</h3>
+  <div class="chart">
+    <%= pie_chart Order.joins(:coffee_list).where('orders.created_at >= ?', (DateTime.now - 3.months)).group('coffee_lists.name').sum(:quantity) %>
+  </div>
+
+  <h3>last month</h3>
+  <div class="chart">
+    <%= pie_chart Order.joins(:coffee_list).where('orders.created_at >= ?', (DateTime.now - 1.months)).group('coffee_lists.name').sum(:quantity) %>
+  </div>
+</div>
